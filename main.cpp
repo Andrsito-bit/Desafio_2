@@ -1,122 +1,104 @@
 #include <iostream>
-#include "mostrar_en_pantalla.h"
-#include <string>
-#include "Red.h" // Archivo donde estarán las clases Red y Estacion
-
+#include <fstream>
+#include <ctime>
+#include "Red.h"
 using namespace std;
 
+void mostrarMenu() {
+    cout << "\n===== Gestión de Red de Estaciones de Gasolina =====" << endl;
+    cout << "1. Mostrar estaciones de una red" << endl;
+    cout << "2. Agregar una nueva estación a una red" << endl;
+    cout << "3. Eliminar una estación de una red" << endl;
+    cout << "4. Registrar una venta en una estación" << endl;
+    cout << "5. Salir" << endl;
+    cout << "Seleccione una opción: ";
+}
 
+void seleccionarRed(Red*& red, Red& norte, Red& centro, Red& sur) {
+    int opcionRed;
+    cout << "Seleccione la red (1: Norte, 2: Centro, 3: Sur): ";
+    cin >> opcionRed;
+
+    switch (opcionRed) {
+    case 1:
+        red = &norte;
+        break;
+    case 2:
+        red = &centro;
+        break;
+    case 3:
+        red = &sur;
+        break;
+    default:
+        cout << "Opción inválida. Seleccionando red Norte por defecto." << endl;
+        red = &norte;
+        break;
+    }
+}
 
 int main() {
+    Red redNorte("norte.txt");
+    Red redCentro("centro.txt");
+    Red redSur("sur.txt");
 
-    int opcionPrincipal;
+    redNorte.cargarDesdeArchivo();
+    redCentro.cargarDesdeArchivo();
+    redSur.cargarDesdeArchivo();
+
+    Red* redSeleccionada = nullptr;
+    int opcion;
+
     do {
-        mostrarMenuPrincipal();
-        cin >> opcionPrincipal;
+        mostrarMenu();
+        cin >> opcion;
 
-        switch (opcionPrincipal) {
+        switch (opcion) {
         case 1: {
-            int opcionRed;
-            do {
-                cout << "\n--- Gestionando Red Norte ---" << endl;
-                mostrarMenuRed();
-                cin >> opcionRed;
-
-                // Aquí irían las llamadas a los métodos de la clase Red para la Red Norte
-                switch (opcionRed) {
-                case 1:
-                    // Lógica para agregar estación a redNorte
-                    break;
-                case 2:
-                    // Lógica para eliminar estación de redNorte
-                    break;
-                case 3:
-                    // Lógica para mostrar estaciones de redNorte
-                    break;
-                case 4:
-                    // Lógica para ver ventas por tipo de combustible en redNorte
-                    break;
-                case 5:
-                    cout << "Regresando al menú principal..." << endl;
-                    break;
-                default:
-                    cout << "Opción no válida. Intente nuevamente." << endl;
-                }
-            } while (opcionRed != 5);
+            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+            redSeleccionada->mostrarEstaciones();
             break;
         }
-
         case 2: {
-            int opcionRed;
-            do {
-                cout << "\n--- Gestionando Red Centro ---" << endl;
-                mostrarMenuRed();
-                cin >> opcionRed;
-
-                // Aquí irían las llamadas a los métodos de la clase Red para la Red Centro
-                switch (opcionRed) {
-                case 1:
-                    // Lógica para agregar estación a redCentro
-                    break;
-                case 2:
-                    // Lógica para eliminar estación de redCentro
-                    break;
-                case 3:
-                    // Lógica para mostrar estaciones de redCentro
-                    break;
-                case 4:
-                    // Lógica para ver ventas por tipo de combustible en redCentro
-                    break;
-                case 5:
-                    cout << "Regresando al menú principal..." << endl;
-                    break;
-                default:
-                    cout << "Opción no válida. Intente nuevamente." << endl;
-                }
-            } while (opcionRed != 5);
+            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+            string nombreEstacion;
+            cout << "Ingrese el nombre de la nueva estación: ";
+            cin.ignore();
+            getline(cin, nombreEstacion);
+            Estacion nuevaEstacion(nombreEstacion);
+            redSeleccionada->agregarEstacion(nuevaEstacion);
             break;
         }
-
         case 3: {
-            int opcionRed;
-            do {
-                cout << "\n--- Gestionando Red Sur ---" << endl;
-                mostrarMenuRed();
-                cin >> opcionRed;
-
-                // Aquí irían las llamadas a los métodos de la clase Red para la Red Sur
-                switch (opcionRed) {
-                case 1:
-                    // Lógica para agregar estación a redSur
-                    break;
-                case 2:
-                    // Lógica para eliminar estación de redSur
-                    break;
-                case 3:
-                    // Lógica para mostrar estaciones de redSur
-                    break;
-                case 4:
-                    // Lógica para ver ventas por tipo de combustible en redSur
-                    break;
-                case 5:
-                    cout << "Regresando al menú principal..." << endl;
-                    break;
-                default:
-                    cout << "Opción no válida. Intente nuevamente." << endl;
-                }
-            } while (opcionRed != 5);
+            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+            int indiceEstacion;
+            cout << "Ingrese el índice de la estación a eliminar (1 a "
+                 << redSeleccionada->getNumEstaciones() << "): ";
+            cin >> indiceEstacion;
+            redSeleccionada->eliminarEstacion(indiceEstacion - 1);
             break;
         }
-
-        case 4:
-            cout << "Saliendo del programa..." << endl;
+        case 4: {
+            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+            int indiceEstacion;
+            double cantidad;
+            string tipoGasolina;
+            cout << "Ingrese el índice de la estación (1 a "
+                 << redSeleccionada->getNumEstaciones() << "): ";
+            cin >> indiceEstacion;
+            cout << "Ingrese la cantidad de gasolina vendida: ";
+            cin >> cantidad;
+            cout << "Ingrese el tipo de gasolina (Regular, Premium, Diesel): ";
+            cin >> tipoGasolina;
+            redSeleccionada->registrarVentaEnEstacion(indiceEstacion - 1, cantidad, tipoGasolina);
             break;
-
+        }
+        case 5:
+            cout << "Saliendo del programa. ¡Gracias!" << endl;
+            break;
         default:
-            cout << "Opción no válida, por favor intente de nuevo." << endl;
+            cout << "Opción inválida. Intente de nuevo." << endl;
         }
-
-    } while (opcionPrincipal != 4);
+    } while (opcion != 5);
 
     return 0;
 }
