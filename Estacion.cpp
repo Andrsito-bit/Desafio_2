@@ -1,94 +1,93 @@
+// Estacion.cpp
 #include "Estacion.h"
+#include <iostream>
+#include <sstream>
+#include <fstream>
 #include <iomanip>
+#include <ctime>
+using namespace std;
 
-// Constructor
-Estacion::Estacion(const string& nombre) : nombre(nombre) {
-    // Inicializar los nombres de los tipos de gasolina y sus ventas a cero
-    tiposGasolina[0] = "Regular";
-    tiposGasolina[1] = "Premium";
-    tiposGasolina[2] = "Diesel";
+Estacion::Estacion(int numero, const string& nombre, const string& nombreRed,
+                  double precioRegular, double precioPremium, double precioEcoExtra)
+    : numero(numero), nombre(nombre), nombreRed(nombreRed),
+    precioRegular(precioRegular), precioPremium(precioPremium), precioEcoExtra(precioEcoExtra) {}
 
-    for (int i = 0; i < MAX_TIPOS; ++i) {
-        preciosGasolina[i] = 0.0;
-        ventasGasolina[i] = 0.0;
-    }
+
+
+void Estacion::mostrarInfo() const {
+    cout << "ID: " << numero << ", Nombre: " << nombre << ", Red: " << nombreRed << endl;
+    cout << "Precios - Regular: " << precioRegular << ", Premium: " << precioPremium
+         << ", EcoExtra: " << precioEcoExtra << endl;
+    cout << "Inventario - Regular: " << inventarioRegular << "L, Premium: " << inventarioPremium
+         << "L, EcoExtra: " << inventarioEcoExtra << "L" << endl;
 }
 
-// Establecer el precio de un tipo de gasolina
-void Estacion::setPrecioGasolina(const string& tipoGasolina, double precio) {
-    int indice = buscarIndiceGasolina(tipoGasolina);
-    if (indice != -1) {
-        preciosGasolina[indice] = precio;
-    } else {
-        cerr << "Error: El tipo de gasolina " << tipoGasolina << " no existe." << endl;
+
+bool Estacion::venderGasolina(double cantidad, const string& tipoGasolina) {
+    if (tipoGasolina == "Regular" && inventarioRegular >= cantidad) {
+        inventarioRegular -= cantidad;
+        return true;
+    } else if (tipoGasolina == "Premium" && inventarioPremium >= cantidad) {
+        inventarioPremium -= cantidad;
+        return true;
+    } else if (tipoGasolina == "EcoExtra" && inventarioEcoExtra >= cantidad) {
+        inventarioEcoExtra -= cantidad;
+        return true;
     }
+    return false; // No hay suficiente inventario
 }
 
-// Obtener el precio de un tipo de gasolina
-double Estacion::getPrecioGasolina(const string& tipoGasolina) const {
-    int indice = buscarIndiceGasolina(tipoGasolina);
-    if (indice != -1) {
-        return preciosGasolina[indice];
-    } else {
-        cerr << "Error: El tipo de gasolina " << tipoGasolina << " no existe." << endl;
-        return -1.0; // Devuelve un valor inválido si el tipo no existe
+
+void Estacion::registrarVenta(double cantidad, const string& tipoGasolina, const string& metodoPago) {
+    double precio = 0.0;
+
+    // Determinar el precio por tipo de gasolina
+    if (tipoGasolina == "Regular") precio = precioRegular;
+    else if (tipoGasolina == "Premium") precio = precioPremium;
+    else if (tipoGasolina == "EcoExtra") precio = precioEcoExtra;
+
+    // Calcular el total a pagar
+    double total = cantidad * precio;
+
+    // Registrar en el archivo de ventas
+    ofstream archivoVentas("registro_ventas.txt", ios::app);
+    if (!archivoVentas) {
+        cerr << "Error al abrir el archivo de ventas para escribir." << endl;
+        return;
     }
+
+    // Obtener la hora actual
+    time_t ahora = time(0);
+    tm* tiempoLocal = localtime(&ahora);
+
+    // Escribir la información de la venta en el archivo
+    archivoVentas << put_time(tiempoLocal, "%Y-%m-%d %H:%M:%S") << " - "
+                  << "Estacion ID: " << numero << " - Tipo: " << tipoGasolina
+                  << " - Cantidad: " << cantidad << "L - Metodo: " << metodoPago
+                  << " - Total: $" << fixed << setprecision(2) << total << endl;
+
+    archivoVentas.close();
+
+    // Mostrar confirmación en consola
+    cout << "Venta registrada: " << cantidad << "L de " << tipoGasolina
+         << " en la Estacion ID " << numero << " con metodo de pago: "
+         << metodoPago << ". Total: $" << total << endl;
 }
 
-// Registrar una venta de gasolina
-void Estacion::registrarVenta(double cantidad, const string& tipoGasolina) {
-    int indice = buscarIndiceGasolina(tipoGasolina);
-    if (indice != -1) {
-        ventasGasolina[indice] += cantidad;
-    } else {
-        cerr << "Error: El tipo de gasolina " << tipoGasolina << " no existe." << endl;
-    }
+string Estacion::toString() const {
+    stringstream ss;
+    ss << numero << "|" << nombre << "|" << nombreRed << "|"
+       << precioRegular << "|" << precioPremium << "|" << precioEcoExtra;
+    return ss.str();
 }
 
-// Mostrar la información de la estación
-void Estacion::mostrar() const {
-    cout << "Estación: " << nombre << endl;
-    cout << "Precios de gasolina:" << endl;
-    for (int i = 0; i < MAX_TIPOS; ++i) {
-        cout << "- " << tiposGasolina[i] << ": $" << fixed << setprecision(2) << preciosGasolina[i] << " por litro" << endl;
-    }
-
-    cout << "Ventas acumuladas:" << endl;
-    for (int i = 0; i < MAX_TIPOS; ++i) {
-        cout << "- " << tiposGasolina[i] << ": " << fixed << setprecision(2) << ventasGasolina[i] << " litros" << endl;
-    }
+int Estacion::getNumero() const {
+    return numero;
 }
 
-// Guardar la información de la estación en un archivo
-void Estacion::guardarEnArchivo(ofstream& archivo) const {
-    archivo << nombre << endl;
-    for (int i = 0; i < MAX_TIPOS; ++i) {
-        archivo << tiposGasolina[i] << " " << preciosGasolina[i] << " " << ventasGasolina[i] << endl;
-    }
-}
-
-// Cargar la información de la estación desde un archivo
-void Estacion::cargarDesdeArchivo(ifstream& archivo) {
-    getline(archivo, nombre);
-
-    for (int i = 0; i < MAX_TIPOS; ++i) {
-        archivo >> tiposGasolina[i] >> preciosGasolina[i] >> ventasGasolina[i];
-    }
-}
-
-// Busca el índice de un tipo de gasolina
-int Estacion::buscarIndiceGasolina(const string& tipoGasolina) const {
-    for (int i = 0; i < MAX_TIPOS; ++i) {
-        if (tiposGasolina[i] == tipoGasolina) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-// Obtener el nombre de la estación
 string Estacion::getNombre() const {
     return nombre;
 }
+
 
 

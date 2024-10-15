@@ -1,23 +1,132 @@
 // Red.cpp
 #include "Red.h"
-#include <fstream>
 #include <iostream>
-using namespace std;
+#include <fstream>
+#include <sstream>
+    using namespace std;
 
-Red::Red(const string& nombreArchivo) : nombreArchivo(nombreArchivo), numEstaciones(0) {}
+Red::Red(const string& nombreArchivo) : nombreArchivo(nombreArchivo), numEstaciones(0) {
+    // Inicializar las estaciones con un estado "vacío"
+    for (int i = 0; i < 100; ++i) {
+        estaciones[i] = Estacion(); // Esto solo inicializa los objetos, pero no los considera como ocupados
+    }
+}
+
+
+void Red::mostrarEstacionesConId() const {
+    if (numEstaciones == 0) {
+        cout << "No hay estaciones registradas." << endl;
+        return;
+    }
+
+    for (int i = 0; i < numEstaciones; ++i) {
+        cout << "ID: " << estaciones[i].getNumero() << " - " << estaciones[i].getNombre() << endl;
+    }
+}
+
+
+void Red::eliminarEstacionPorId(int id) {
+    bool encontrada = false;
+    for (int i = 0; i < numEstaciones; ++i) {
+        if (estaciones[i].getNumero() == id) {
+            encontrada = true;
+            // Shift left para cubrir el espacio eliminado
+            for (int j = i; j < numEstaciones - 1; ++j) {
+                estaciones[j] = estaciones[j + 1];
+            }
+            --numEstaciones;
+            guardarEnArchivo(); // Guardar inmediatamente después de eliminar
+            cout << "Estacion con ID " << id << " eliminada." << endl;
+            break;
+        }
+    }
+
+    if (!encontrada) {
+        cout << "No se encontró una estación con el ID proporcionado." << endl;
+    }
+}
+
+
+
+void Red::agregarEstacion(const Estacion& estacion) {
+    if (numEstaciones < 100) {
+        estaciones[numEstaciones] = estacion;
+        ++numEstaciones;
+        guardarEnArchivo(); // Guardar inmediatamente después de agregar
+    } else {
+        cerr << "No se pueden agregar más estaciones. Límite alcanzado." << endl;
+    }
+}
+
+void Red::mostrarEstaciones() const {
+    if (numEstaciones == 0) {
+        cout << "No hay estaciones registradas en esta red." << endl;
+        return;
+    }
+
+    for (int i = 0; i < numEstaciones; ++i) {
+        cout << "\nEstacion " << (i + 1) << ":" << endl;
+        estaciones[i].mostrarInfo();
+    }
+}
+
+
+
+void Red::registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina,const string& metodoPago) {
+    if (indice >= 0 && indice < numEstaciones) {
+        estaciones[indice].registrarVenta(cantidad, tipoGasolina,metodoPago);
+    } else {
+        cerr << "Índice de estación inválido. No se puede registrar la venta." << endl;
+    }
+}
+
+int Red::getNumEstaciones() const {
+    return numEstaciones;
+}
+
+string Red::getNombreArchivo() const {
+    return nombreArchivo;
+}
 
 void Red::cargarDesdeArchivo() {
     ifstream archivo(nombreArchivo);
-    if (!archivo) {
-        cerr << "Error al abrir el archivo: " << nombreArchivo << endl;
+    if (!archivo.is_open()) {
+        cerr << "Error al abrir el archivo para cargar." << endl;
         return;
     }
-    numEstaciones = 0; // Reiniciar el número de estaciones antes de cargar
-    string nombreEstacion;
 
-    while (getline(archivo, nombreEstacion) && numEstaciones < 100) {
-        estaciones[numEstaciones] = Estacion(nombreEstacion);
-        ++numEstaciones;
+    string linea;
+    while (getline(archivo, linea)) {
+        try {
+            stringstream ss(linea);
+            string numeroStr, nombre, red, precioRegularStr, precioPremiumStr, precioEcoExtraStr;
+
+            getline(ss, numeroStr, '|');
+            getline(ss, nombre, '|');
+            getline(ss, red, '|');
+            getline(ss, precioRegularStr, '|');
+            getline(ss, precioPremiumStr, '|');
+            getline(ss, precioEcoExtraStr, '|');
+
+            if (numeroStr.empty() || precioRegularStr.empty() || precioPremiumStr.empty() || precioEcoExtraStr.empty()) {
+                cerr << "Error: una de las entradas está vacía. Línea: " << linea << endl;
+                continue;
+            }
+
+            int numero = stoi(numeroStr);
+            double precioRegular = stod(precioRegularStr);
+            double precioPremium = stod(precioPremiumStr);
+            double precioEcoExtra = stod(precioEcoExtraStr);
+
+            Estacion estacion(numero, nombre, red, precioRegular, precioPremium, precioEcoExtra);
+            agregarEstacion(estacion);
+        } catch (const invalid_argument& e)
+
+        {
+            cerr << "Error de conversión en la linea: " << linea << " - " << e.what() << endl;
+        } catch (const out_of_range& e) {
+            cerr << "Valor fuera de rango en la linea: " << linea << " - " << e.what() << endl;
+        }
     }
 
     archivo.close();
@@ -31,55 +140,10 @@ void Red::guardarEnArchivo() const {
     }
 
     for (int i = 0; i < numEstaciones; ++i) {
-        archivo << estaciones[i].getNombre() << endl;
+        archivo << estaciones[i].toString() << endl;
     }
 
     archivo.close();
 }
 
-void Red::agregarEstacion(const Estacion& estacion) {
-    if (numEstaciones < 100) {
-        estaciones[numEstaciones] = estacion;
-        ++numEstaciones;
-    } else {
-        cerr << "No se pueden agregar más estaciones. Límite alcanzado." << endl;
-    }
-}
 
-void Red::eliminarEstacion(int indice) {
-    if (indice >= 0 && indice < numEstaciones) {
-        for (int i = indice; i < numEstaciones - 1; ++i) {
-            estaciones[i] = estaciones[i + 1];
-        }
-        --numEstaciones;
-    } else {
-        cerr << "Índice de estación inválido. No se puede eliminar." << endl;
-    }
-}
-
-void Red::mostrarEstaciones() const {
-    if (numEstaciones == 0) {
-        cout << "No hay estaciones disponibles en esta red." << endl;
-    } else {
-        for (int i = 0; i < numEstaciones; ++i) {
-            cout << "Estación " << (i + 1) << ": " << estaciones[i].getNombre() << endl;
-        }
-    }
-}
-
-void Red::registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina) {
-    if (indice >= 0 && indice < numEstaciones) {
-        estaciones[indice].registrarVenta(cantidad, tipoGasolina);
-    } else {
-        cerr << "Índice de estación inválido. No se puede registrar la venta." << endl;
-    }
-}
-
-// Getters
-int Red::getNumEstaciones() const {
-    return numEstaciones;
-}
-
-string Red::getNombreArchivo() const {
-    return nombreArchivo;
-}
