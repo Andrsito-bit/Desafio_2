@@ -54,7 +54,7 @@ void Red::agregarEstacion(const Estacion& estacion) {
         ++numEstaciones;
         guardarEnArchivo(); // Guardar inmediatamente después de agregar
     } else {
-        cerr << "No se pueden agregar más estaciones. Límite alcanzado." << endl;
+        cerr << "No se pueden agregar más estaciones. Limite alcanzado." << endl;
     }
 }
 
@@ -65,19 +65,27 @@ void Red::mostrarEstaciones() const {
     }
 
     for (int i = 0; i < numEstaciones; ++i) {
-        cout << "\nEstacion " << (i + 1) << ":" << endl;
+        cout << "Estacion " << (i + 1) << ":" << endl;
         estaciones[i].mostrarInfo();
+        cout <<endl;
     }
 }
 
 
 
-void Red::registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina,const string& metodoPago) {
+bool Red::registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina, const string& metodoPago) {
     if (indice >= 0 && indice < numEstaciones) {
-        estaciones[indice].registrarVenta(cantidad, tipoGasolina,metodoPago);
-    } else {
-        cerr << "Índice de estación inválido. No se puede registrar la venta." << endl;
+        // Verificar si la venta puede realizarse
+        bool ventaExitosa = estaciones[indice].venderGasolina(cantidad, tipoGasolina);
+
+        if (ventaExitosa) {
+            // Registrar la venta solo si se pudo vender la cantidad solicitada
+            estaciones[indice].registrarVenta(cantidad, tipoGasolina, metodoPago);
+            guardarEnArchivo(); // Guardar los cambios en el archivo
+            return true;
+        }
     }
+    return false;
 }
 
 int Red::getNumEstaciones() const {
@@ -109,7 +117,7 @@ void Red::cargarDesdeArchivo() {
             getline(ss, precioEcoExtraStr, '|');
 
             if (numeroStr.empty() || precioRegularStr.empty() || precioPremiumStr.empty() || precioEcoExtraStr.empty()) {
-                cerr << "Error: una de las entradas está vacía. Línea: " << linea << endl;
+                cerr << "Error: una de las entradas esta vacia. Linea: " << linea << endl;
                 continue;
             }
 

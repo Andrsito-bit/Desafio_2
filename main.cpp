@@ -18,7 +18,7 @@ string seleccion_metodo_pago() {
 
     // Validar la selección del método de pago
     while (seleccion != "1" && seleccion != "2" && seleccion != "3") {
-        cout << "Método de pago no válido. Por favor, seleccione uno de los disponibles." << endl;
+        cout << "Metodo de pago no valido. Por favor, seleccione uno de los disponibles." << endl;
         cout << "1) Efectivo  2) T.Credito  3) T.Debito" << endl;
         cin >> seleccion;
     }
@@ -37,7 +37,7 @@ string seleccion_tipo_gasolina() {
 
     // Validar la selección del tipo de gasolina
     while (seleccion != "1" && seleccion != "2" && seleccion != "3") {
-        cout << "Tipo de gasolina no válido. Por favor, seleccione uno de los disponibles." << endl;
+        cout << "Tipo de gasolina no valido. Por favor, seleccione uno de los disponibles." << endl;
         cout << "1) Regular  2) Premium  3) EcoExtra" << endl;
         cin >> seleccion;
     }
@@ -56,15 +56,33 @@ void mostrarMenu() {
     cout << "2. Agregar una nueva estacion a una red" << endl;
     cout << "3. Eliminar una estacion de una red" << endl;
     cout << "4. Registrar una venta en una estacion" << endl;
-    cout << "5. Salir" << endl;
+    cout << "5. Salir "<<endl;
     cout << "Seleccione una opcion: ";
 }
 
 void seleccionarRed(Red*& red, Red& norte, Red& centro, Red& sur) {
+    string seleccion;
     int opcionRed;
-    cout << "Seleccione la red (1: Norte, 2: Centro, 3: Sur): ";
-    cin >> opcionRed;
 
+    cout << "Seleccione la red (1: Norte, 2: Centro, 3: Sur): ";
+    cin >> seleccion;
+    while (seleccion != "1" && seleccion != "2"&& seleccion != "3"){
+
+        cout << " Debes seleccionar una opcion valida "<<endl;
+        cout << "Seleccione la red (1: Norte, 2: Centro, 3: Sur): ";
+        cin >> seleccion;
+    }
+
+    if(seleccion == "1"){
+        opcionRed = 1;
+    }
+    if(seleccion == "2"){
+        opcionRed = 2;
+    }
+    if(seleccion == "3"){
+        opcionRed = 3;
+    }
+    // Asignar la red seleccionada
     switch (opcionRed) {
     case 1:
         red = &norte;
@@ -75,12 +93,9 @@ void seleccionarRed(Red*& red, Red& norte, Red& centro, Red& sur) {
     case 3:
         red = &sur;
         break;
-    default:
-        cout << "Opcion invalida. Seleccionando red Norte por defecto." << endl;
-        red = &norte;
-        break;
     }
 }
+
 
 
 int main() {
@@ -99,6 +114,13 @@ int main() {
         mostrarMenu();
         cin >> opcion;
 
+        while (cin.fail()) {
+            cin.clear();
+            while (cin.get() != '\n'); // Limpiar la entrada no válida
+            cout << "Opción invalida. Ingrese un numero: ";
+            cin >> opcion;
+        }
+
         switch (opcion) {
         case 1: {
             borr();
@@ -111,85 +133,141 @@ int main() {
             break;
         }
         case 2: {
-            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
-            int numero;
-            string nombreEstacion;
-            double precioRegular, precioPremium, precioDiesel;
+            try {
+                seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+                int numero;
+                string nombreEstacion;
+                double precioRegular, precioPremium, precioEcoExtra;
 
-            cout << "Ingrese el identificador de la estacion: ";
-            cin >> numero;
-            cout << "Ingrese el nombre de la nueva estacion: ";
-            cin.ignore();
-            getline(cin, nombreEstacion);
-            cout << "Ingrese el precio de la gasolina Regular: ";
-            cin >> precioRegular;
-            cout << "Ingrese el precio de la gasolina Premium: ";
-            cin >> precioPremium;
-            cout << "Ingrese el precio de la gasolina Diesel: ";
-            cin >> precioDiesel;
+                cout << "Ingrese el identificador de la estacion: ";
+                cin >> numero;
+                while (cin.fail()) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Entrada invalida. Debe ingresar un numero para el identificador." << endl;
+                    cout << "Ingrese el identificador de la estacion: ";
+                    cin >> numero;
+                }
 
-            Estacion nuevaEstacion(numero, nombreEstacion, redSeleccionada->getNombreArchivo(), precioRegular, precioPremium, precioDiesel);
-            redSeleccionada->agregarEstacion(nuevaEstacion);
+                cout << "Ingrese el nombre de la estacion: ";
+                cin.ignore();
+                getline(cin, nombreEstacion);
+
+                cout << "Ingrese el precio de la gasolina Regular: ";
+                cin >> precioRegular;
+                while (cin.fail() || precioRegular <= 0) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Entrada invalida. Debe ingresar un numero positivo para el precio de la gasolina Regular." << endl;
+                    cout << "Ingrese el precio de la gasolina Regular: ";
+                    cin >> precioRegular;
+                }
+
+                cout << "Ingrese el precio de la gasolina Premium: ";
+                cin >> precioPremium;
+                while (cin.fail() || precioPremium <= 0) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Entrada invalida. Debe ingresar un numero positivo para el precio de la gasolina Premium." << endl;
+                    cout << "Ingrese el precio de la gasolina Premium: ";
+                    cin >> precioPremium;
+                }
+
+                cout << "Ingrese el precio de la gasolina EcoExtra: ";
+                cin >> precioEcoExtra;
+                while (cin.fail() || precioEcoExtra <= 0) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Entrada invalida. Debe ingresar un numero positivo para el precio de la gasolina EcoExtra." << endl;
+                    cout << "Ingrese el precio de la gasolina EcoExtra: ";
+                    cin >> precioEcoExtra;
+                }
+
+                Estacion nuevaEstacion(numero, nombreEstacion, redSeleccionada->getNombreArchivo(), precioRegular, precioPremium, precioEcoExtra);
+                redSeleccionada->agregarEstacion(nuevaEstacion);
+
+                cout << "Estacion agregada exitosamente a la red." << endl;
+            } catch (const exception& e) {
+                cerr << "Ocurrio un error durante la operacion: " << e.what() << endl;
+            }
             break;
         }
-
         case 3: {
-            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
-            redSeleccionada->mostrarEstacionesConId();
-            int idEstacion;
-            cout << "Ingrese el ID de la estacion a eliminar: ";
-            cin >> idEstacion;
+            try {
+                seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+                redSeleccionada->mostrarEstacionesConId();
+                int idEstacion;
+                cout << "Ingrese el ID de la estacion a eliminar: ";
+                cin >> idEstacion;
 
-            redSeleccionada->eliminarEstacionPorId(idEstacion);
+                while (cin.fail() || idEstacion <= 0) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Entrada invalida. Debe ingresar un numero positivo para el ID de la estacion." << endl;
+                    cout << "Ingrese el ID de la estacion a eliminar: ";
+                    cin >> idEstacion;
+                }
+
+                redSeleccionada->eliminarEstacionPorId(idEstacion);
+            } catch (const exception& e) {
+                cerr << "Ocurrio un error durante la operacion: " << e.what() << endl;
+            }
             break;
         }
-
         case 4: {
-            seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
-            int indiceEstacion;
-            double cantidad;
-            string tipoGasolina;
-            string metodoPago;
+            try {
+                seleccionarRed(redSeleccionada, redNorte, redCentro, redSur);
+                int indiceEstacion;
+                double cantidad;
+                string tipoGasolina;
+                string metodoPago;
 
-            // Verificar que haya al menos una estación en la red seleccionada
-            if (redSeleccionada->getNumEstaciones() == 0) {
-                cout << "No hay estaciones registradas en esta red." << endl;
-                break;
+                if (redSeleccionada->getNumEstaciones() == 0) {
+                    cout << "No hay estaciones registradas en esta red." << endl;
+                    break;
+                }
+
+                redSeleccionada->mostrarEstaciones();
+                cout <<endl;
+                cout << "Ingrese el indice de la estacion (No su ID): ";
+                cin >> indiceEstacion;
+
+                while (cin.fail() || indiceEstacion < 1 || indiceEstacion > redSeleccionada->getNumEstaciones()) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Indice de estacion invalido. Por favor, ingrese un numero entre 1 y "
+                         << redSeleccionada->getNumEstaciones() << "." << endl;
+                    cout << "Ingrese el indice de la estacion (No su ID): ";
+                    cin >> indiceEstacion;
+                }
+
+                cout << "Ingrese la cantidad de gasolina vendida: ";
+                cin >> cantidad;
+
+                while (cin.fail() || cantidad <= 0) {
+                    cin.clear();
+                    while (cin.get() != '\n');
+                    cout << "Cantidad de gasolina no valida. Debe ser un numero mayor a 0." << endl;
+                    cout << "Ingrese la cantidad de gasolina vendida: ";
+                    cin >> cantidad;
+                }
+
+                tipoGasolina = seleccion_tipo_gasolina();
+                metodoPago = seleccion_metodo_pago();
+
+                bool ventaExitosa = redSeleccionada->registrarVentaEnEstacion(indiceEstacion - 1, cantidad, tipoGasolina, metodoPago);
+
+                if (ventaExitosa) {
+                    cout << "Venta registrada exitosamente." << endl;
+                } else {
+                    cout << "La venta no pudo completarse. No hay suficiente inventario de "
+                         << tipoGasolina << " en la estacion seleccionada." << endl;
+                }
+            } catch (const exception& e) {
+                cerr << "Ocurrio un error durante la operación: " << e.what() << endl;
             }
-
-            // Seleccionar la estación por índice
-            cout << "Ingrese el indice de la estación (1 a "
-                 << redSeleccionada->getNumEstaciones() << "): ";
-            cin >> indiceEstacion;
-
-            // Validar el índice de la estación
-            if (indiceEstacion < 1 || indiceEstacion > redSeleccionada->getNumEstaciones()) {
-                cout << "Índice de estación inválido. Por favor, ingrese un número entre 1 y "
-                     << redSeleccionada->getNumEstaciones() << "." << endl;
-                break;
-            }
-
-            // Ingresar la cantidad de gasolina
-            cout << "Ingrese la cantidad de gasolina vendida: ";
-            cin >> cantidad;
-
-            // Validar la cantidad de gasolina
-            if (cantidad <= 0) {
-                cout << "Cantidad de gasolina no válida. Debe ser mayor a 0." << endl;
-                break;
-            }
-
-            // Seleccionar el tipo de gasolina usando la función
-            tipoGasolina = seleccion_tipo_gasolina();
-
-            // Seleccionar el método de pago usando la función
-            metodoPago = seleccion_metodo_pago();
-
-            // Registrar la venta en la estación seleccionada
-            redSeleccionada->registrarVentaEnEstacion(indiceEstacion - 1, cantidad, tipoGasolina, metodoPago);
             break;
         }
-
         case 5:
             cout << "Saliendo del programa. Gracias!" << endl;
             break;
@@ -200,4 +278,4 @@ int main() {
 
     return 0;
 }
-
+tostring
