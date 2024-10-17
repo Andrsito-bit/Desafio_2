@@ -16,7 +16,7 @@ public:
     void mostrarEstaciones() const;
     void mostrarEstacionesConId() const;
     void eliminarEstacionPorId(int id);
-    bool registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina,const string& metodopago);
+    int registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina,const string& metodopago);
 
     // Getters
     int getNumEstaciones() const;       // Obtiene el número de estaciones

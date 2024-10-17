@@ -16,6 +16,9 @@ public:
     bool venderGasolina(double cantidad, const string& tipoGasolina);
     string toString() const;
 
+    bool verific_fuga() const;
+
+
     // Getters
     int getNumero()const;
     string getNombre() const;
@@ -42,6 +45,11 @@ private:
     double inventarioRegular = 200; // Inventario inicial de gasolina
     double inventarioPremium = 200;
     double inventarioEcoExtra = 200;
+
+    // Variables para almacenar el inventario verificado anteriormente
+    double inventarioRegularAnterior = 200;
+    double inventarioPremiumAnterior = 200;
+    double inventarioEcoExtraAnterior = 200;
 };
 
 #endif

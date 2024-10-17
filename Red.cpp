@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-    using namespace std;
+using namespace std;
 
 Red::Red(const string& nombreArchivo) : nombreArchivo(nombreArchivo), numEstaciones(0) {
     // Inicializar las estaciones con un estado "vacío"
@@ -73,19 +73,22 @@ void Red::mostrarEstaciones() const {
 
 
 
-bool Red::registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina, const string& metodoPago) {
+int Red::registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina, const string& metodoPago) {
     if (indice >= 0 && indice < numEstaciones) {
         // Verificar si la venta puede realizarse
+        if (estaciones[indice].verific_fuga()){
+            return 2;
+        }
         bool ventaExitosa = estaciones[indice].venderGasolina(cantidad, tipoGasolina);
 
         if (ventaExitosa) {
             // Registrar la venta solo si se pudo vender la cantidad solicitada
             estaciones[indice].registrarVenta(cantidad, tipoGasolina, metodoPago);
             guardarEnArchivo(); // Guardar los cambios en el archivo
-            return true;
+            return 3;
         }
     }
-    return false;
+    return 1;
 }
 
 int Red::getNumEstaciones() const {
@@ -154,5 +157,4 @@ void Red::guardarEnArchivo() const {
 
     archivo.close();
 }
-
 

@@ -8,7 +8,7 @@
 using namespace std;
 
 Estacion::Estacion(int numero, const string& nombre, const string& nombreRed,
-                  double precioRegular, double precioPremium, double precioEcoExtra)
+                   double precioRegular, double precioPremium, double precioEcoExtra)
     : numero(numero), nombre(nombre), nombreRed(nombreRed),
     precioRegular(precioRegular), precioPremium(precioPremium), precioEcoExtra(precioEcoExtra) {}
 
@@ -24,6 +24,7 @@ void Estacion::mostrarInfo() const {
 
 
 bool Estacion::venderGasolina(double cantidad, const string& tipoGasolina) {
+
     if (tipoGasolina == "Regular" && inventarioRegular >= cantidad) {
         inventarioRegular -= cantidad;
         return true;
@@ -72,6 +73,10 @@ void Estacion::registrarVenta(double cantidad, const string& tipoGasolina, const
     cout << "Venta registrada: " << cantidad << "L de " << tipoGasolina
          << " en la Estacion ID " << numero << " con metodo de pago: "
          << metodoPago << ". Total: $" << total << endl;
+
+    inventarioRegularAnterior = inventarioRegular;
+    inventarioPremiumAnterior = inventarioPremium;
+    inventarioEcoExtraAnterior = inventarioEcoExtra;
 }
 
 string Estacion::toString() const {
@@ -88,6 +93,13 @@ int Estacion::getNumero() const {
 string Estacion::getNombre() const {
     return nombre;
 }
+
+bool Estacion::verific_fuga() const {
+    return (inventarioRegular <= inventarioRegularAnterior*0.95 ||
+            inventarioPremium <= inventarioPremiumAnterior*0.95 ||
+            inventarioEcoExtra <= inventarioEcoExtraAnterior*0.95);
+}
+
 
 
 

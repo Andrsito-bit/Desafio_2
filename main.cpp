@@ -276,14 +276,20 @@ int main() {
                 tipoGasolina = seleccion_tipo_gasolina();
                 metodoPago = seleccion_metodo_pago();
 
-                bool ventaExitosa = redSeleccionada->registrarVentaEnEstacion(indiceEstacion - 1, cantidad, tipoGasolina, metodoPago);
+                int ventaExitosa = redSeleccionada->registrarVentaEnEstacion(indiceEstacion - 1, cantidad, tipoGasolina, metodoPago);
+                if (ventaExitosa == 2){
+                    cout<<"ALERTA"<<endl;
+                    cout << "Hay una Fuga de combustible en la estacion No"<<indiceEstacion<<endl;
+                    cout <<endl;
+                }
 
-                if (ventaExitosa) {
+                if (ventaExitosa == 3) {
                     cout << "Venta registrada exitosamente." << endl;
                 } else {
                     cout << "La venta no pudo completarse. No hay suficiente inventario de "
                          << tipoGasolina << " en la estacion seleccionada." << endl;
                 }
+
             } catch (const exception& e) {
                 cerr << "Ocurrio un error durante la operación: " << e.what() << endl;
             }
