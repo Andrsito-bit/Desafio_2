@@ -126,6 +126,7 @@ void Red::cargarDesdeArchivo() {
             double precioPremium = stod(precioPremiumStr);
             double precioEcoExtra = stod(precioEcoExtraStr);
 
+
             Estacion estacion(numero, nombre, red, precioRegular, precioPremium, precioEcoExtra);
             agregarEstacion(estacion);
         } catch (const invalid_argument& e)

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <fstream>
 #include "Red.h"
 using namespace std;
 
@@ -9,6 +10,29 @@ void borr() {
     }
 }
 
+void mostrarRegistrosDeVentas() {
+    ifstream archivoVentas("registro_ventas.txt");
+
+    // Verificar si el archivo se pudo abrir correctamente
+    if (!archivoVentas.is_open()) {
+        cerr << "No se pudo abrir el archivo de registros de ventas. Verifique que el archivo exista." << endl;
+        return;
+    }
+
+    // Encabezado simple
+    cout << "\n===== Registros de Ventas =====" << endl;
+    cout << "Fecha y Hora               | Estacion ID | Tipo       | Cantidad | Metodo   | Total" << endl;
+    cout << "--------------------------------------------------------------------------------" << endl;
+
+    string linea;
+    while (getline(archivoVentas, linea)) {
+        cout << linea << endl;
+    }
+
+    archivoVentas.close();
+    cout << "--------------------------------------------------------------------------------" << endl;
+    cout << "===== Fin de los Registros =====" << endl;
+}
 
 string seleccion_metodo_pago() {
     string seleccion;
@@ -48,15 +72,14 @@ string seleccion_tipo_gasolina() {
     return "EcoExtra";
 }
 
-
-
 void mostrarMenu() {
     cout << "\n===== Gestion de Red de Estaciones de Gasolina =====" << endl;
     cout << "1. Mostrar estaciones de una red" << endl;
     cout << "2. Agregar una nueva estacion a una red" << endl;
     cout << "3. Eliminar una estacion de una red" << endl;
     cout << "4. Registrar una venta en una estacion" << endl;
-    cout << "5. Salir "<<endl;
+    cout << "5. Salir" << endl;
+    cout << "6. Mostrar registros de ventas" << endl;
     cout << "Seleccione una opcion: ";
 }
 
@@ -96,8 +119,6 @@ void seleccionarRed(Red*& red, Red& norte, Red& centro, Red& sur) {
     }
 }
 
-
-
 int main() {
     Red redNorte("norte.txt");
     Red redCentro("centro.txt");
@@ -107,7 +128,7 @@ int main() {
     redCentro.cargarDesdeArchivo();
     redSur.cargarDesdeArchivo();
 
-    Red* redSeleccionada = nullptr;
+    Red* redSeleccionada;
     int opcion;
 
     do {
@@ -271,6 +292,11 @@ int main() {
         case 5:
             cout << "Saliendo del programa. Gracias!" << endl;
             break;
+        case 6: {
+            mostrarRegistrosDeVentas();
+            break;
+        }
+
         default:
             cout << "Opcion invalida. Intente de nuevo." << endl;
         }
@@ -278,4 +304,3 @@ int main() {
 
     return 0;
 }
-tostring

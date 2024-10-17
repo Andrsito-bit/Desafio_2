@@ -14,8 +14,8 @@ public:
     void agregarEstacion(const Estacion& estacion);
     void eliminarEstacion(int indice);
     void mostrarEstaciones() const;
-    void mostrarEstacionesConId() const; // Declaración agregada
-    void eliminarEstacionPorId(int id);  // Declaración agregada
+    void mostrarEstacionesConId() const;
+    void eliminarEstacionPorId(int id);
     bool registrarVentaEnEstacion(int indice, double cantidad, const string& tipoGasolina,const string& metodopago);
 
     // Getters
@@ -24,7 +24,7 @@ public:
 
 private:
     string nombreArchivo;
-    Estacion estaciones[100];  // Supongamos un límite de 100 estaciones
+    Estacion estaciones[100];  // Pongamos un límite de 100 estaciones
     int numEstaciones;
 };
 
